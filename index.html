@@ -1,0 +1,336 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Premium Tools — PDF & File Utilities</title>
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=" />
+  <style>
+    /* Minimal premium styling */
+    :root{--bg:#0f1724;--card:#0b1220;--accent:#7c3aed;--muted:rgba(255,255,255,0.7)}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI","Helvetica Neue",Arial;color: #e6eef8;background:linear-gradient(180deg,#071022 0%,#0b1224 100%);-webkit-font-smoothing:antialiased}
+    header{display:flex;align-items:center;justify-content:space-between;padding:20px 28px;border-bottom:1px solid rgba(255,255,255,0.03)}
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#06b6d4);display:flex;align-items:center;justify-content:center;font-weight:700;color:white}
+    h1{font-size:18px;margin:0}
+    .tag{font-size:12px;color:var(--muted)}
+    .container{max-width:1100px;margin:28px auto;padding:20px}.grid{display:grid;grid-template-columns:1fr 360px;gap:20px}
+.card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border-radius:14px;padding:18px;border:1px solid rgba(255,255,255,0.03)}
+.tools{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.tool{background:linear-gradient(180deg,rgba(255,255,255,0.015),transparent);padding:14px;border-radius:10px;border:1px solid rgba(255,255,255,0.02);cursor:pointer}
+.tool h3{margin:0;font-size:15px}
+.tool p{margin:6px 0 0;font-size:13px;color:var(--muted)}
+
+.panel{position:sticky;top:20px}
+.input-row{margin-top:12px}
+input[type=file]{display:block}
+label{font-size:13px;color:var(--muted)}
+button.primary{background:linear-gradient(90deg,var(--accent),#06b6d4);border:none;padding:10px 14px;border-radius:10px;color:white;font-weight:600;cursor:pointer}
+button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:8px;color:var(--muted);cursor:pointer}
+
+.preview{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+img.preview-img{max-width:100%;border-radius:8px;border:1px solid rgba(255,255,255,0.05)}
+textarea{width:100%;min-height:160px;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+
+footer{margin-top:28px;text-align:center;color:var(--muted)}
+
+/* responsive */
+@media(max-width:900px){.grid{grid-template-columns:1fr}.panel{position:static}}
+
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo">PT</div>
+      <div>
+        <h1>Premium Tools</h1>
+        <div class="tag">PDF • Image • Text • Utilities — 10★ Premium Look</div>
+      </div>
+    </div>
+    <div>
+      <button class="ghost" onclick="toggleTheme()">Theme</button>
+      <button class="primary" onclick="openDocs()">Docs</button>
+    </div>
+  </header>  <main class="container">
+    <div class="grid">
+      <div>
+        <div class="card">
+          <h2 style="margin:0 0 8px">All-in-one File Utilities</h2>
+          <p style="margin:0 0 18px;color:var(--muted)">Fast, client-side processing so user files never leave their browser. Includes: PDF → JPG, Image → PDF, Text → PDF, Merge PDFs, Compress PDF (beta) and more.</p><div class="tools">
+        <div class="tool" onclick="showTool('pdfToJpg')">
+          <h3>PDF → JPG</h3>
+          <p>High-resolution JPEGs from PDF pages (custom scale & quality).</p>
+        </div>
+
+        <div class="tool" onclick="showTool('imgToPdf')">
+          <h3>Photo → PDF</h3>
+          <p>Combine one or many images into a single PDF (A4 / Fit).</p>
+        </div>
+
+        <div class="tool" onclick="showTool('textToPdf')">
+          <h3>Text → PDF</h3>
+          <p>Turn plain text into a styled, downloadable PDF.</p>
+        </div>
+
+        <div class="tool" onclick="showTool('mergePdf')">
+          <h3>Merge PDFs</h3>
+          <p>Merge several PDF documents into one file (client-side).</p>
+        </div>
+
+        <div class="tool" onclick="showTool('compressPdf')">
+          <h3>Compress PDF (Beta)</h3>
+          <p>Simple compression using image recompression & downscaling.</p>
+        </div>
+
+        <div class="tool" onclick="showTool('more')">
+          <h3>More Tools</h3>
+          <p>Rotate, Split, OCR (future), Watermark, Convert Office → PDF.</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="toolArea" class="card" style="margin-top:18px">
+      <!-- dynamic tool UI injected here -->
+      <div id="blank" style="text-align:center;color:var(--muted)">
+        <p>Select a tool from above to start. All processing happens locally in your browser.</p>
+      </div>
+    </div>
+  </div>
+
+  <aside class="panel">
+    <div class="card">
+      <h3>Quick Actions</h3>
+      <p style="color:var(--muted)">Drag & drop friendly. Try recommended settings for 1MB+ output:</p>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="primary" onclick="recommended()">1MB+ JPG</button>
+        <button class="ghost" onclick="downloadSample()">Download Demo</button>
+      </div>
+
+      <div style="margin-top:14px">
+        <h4 style="margin:0 0 8px">Support</h4>
+        <p style="color:var(--muted);margin:0">Want custom branding, more tools, or hosting on GitHub Pages? Contact the developer and I'll tailor it.</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <h4 style="margin:0 0 8px">Why Premium?</h4>
+      <ul style="margin:0;color:var(--muted);padding-left:18px">
+        <li>Polished UI & smooth UX</li>
+        <li>Everything client-side → privacy-first</li>
+        <li>Optimized for mobile & desktop</li>
+      </ul>
+    </div>
+  </aside>
+</div>
+
+<footer>
+  Built for you — premium template. © 2025
+</footer>
+
+  </main>  <!-- Libraries (CDN) -->  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.14.305/pdf.min.js"></script>  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>  <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>  <script>
+    // small helpers & initial state
+    const tools = document.getElementById('toolArea');
+    function showTool(key){
+      const templates = {
+        pdfToJpg: pdfToJpgUI(),
+        imgToPdf: imgToPdfUI(),
+        textToPdf: textToPdfUI(),
+        mergePdf: mergePdfUI(),
+        compressPdf: compressPdfUI(),
+        more: moreUI()
+      };
+      tools.innerHTML = '';
+      tools.appendChild(templates[key]);
+    }
+
+    function pdfToJpgUI(){
+      const el = document.createElement('div');
+      el.innerHTML = `
+        <h3 style="margin:0 0 8px">PDF → JPG</h3>
+        <label class="input-row">Upload PDF (browser-only):<input type="file" id="pdfFileInput" accept="application/pdf"></label>
+        <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+          <label>Scale: <input id="scaleRange" type="range" min="3" max="12" value="6"></label>
+          <label>Quality: <select id="jpegQuality"><option value="1.0">1.0</option><option value="0.95">0.95</option><option value="0.9">0.9</option><option value="0.85">0.85</option></select></label>
+          <button class="primary" onclick="convertPDFtoJPG()">Convert</button>
+        </div>
+        <div id="pdfToJpgPreview" class="preview"></div>
+      `;
+      return el;
+    }
+
+    async function convertPDFtoJPG(){
+      const file = document.getElementById('pdfFileInput').files[0];
+      if(!file){alert('Upload PDF first');return}
+      const scale = parseInt(document.getElementById('scaleRange').value);
+      const quality = parseFloat(document.getElementById('jpegQuality').value);
+      const reader = new FileReader();
+      reader.onload = async function(e){
+        const typed = new Uint8Array(e.target.result);
+        const pdf = await pdfjsLib.getDocument(typed).promise;
+        const preview = document.getElementById('pdfToJpgPreview'); preview.innerHTML='';
+        const zip = new JSZip();
+        for(let i=1;i<=pdf.numPages;i++){
+          const page = await pdf.getPage(i);
+          const viewport = page.getViewport({scale});
+          const canvas = document.createElement('canvas');
+          canvas.width = viewport.width; canvas.height = viewport.height;
+          const ctx = canvas.getContext('2d');
+          await page.render({canvasContext:ctx,viewport}).promise;
+          const img = document.createElement('img'); img.className='preview-img'; img.src = canvas.toDataURL('image/jpeg',0.7);
+          preview.appendChild(img);
+          const blob = await new Promise(res=>canvas.toBlob(res,'image/jpeg',quality));
+          zip.file(`page_${i}.jpg`, blob);
+        }
+        const blobZip = await zip.generateAsync({type:'blob'});
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blobZip); a.download='pdf_pages.zip'; a.textContent='Download ZIP'; a.className='download'; preview.appendChild(a);
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function imgToPdfUI(){
+      const el = document.createElement('div');
+      el.innerHTML = `
+        <h3 style="margin:0 0 8px">Image(s) → Single PDF</h3>
+        <label class="input-row">Choose Images: <input type="file" id="imgFiles" accept="image/*" multiple></label>
+        <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+          <label>Paper: <select id="paperSize"><option value="a4">A4</option><option value="fit">Fit to image</option></select></label>
+          <button class="primary" onclick="imagesToPDF()">Create PDF</button>
+        </div>
+        <div id="imgToPdfPreview" class="preview"></div>
+      `;
+      return el;
+    }
+
+    async function imagesToPDF(){
+      const files = document.getElementById('imgFiles').files; if(!files.length){alert('Choose images');return}
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({unit:'pt',format:'a4'});
+      const preview = document.getElementById('imgToPdfPreview'); preview.innerHTML='';
+      for(let i=0;i<files.length;i++){
+        const file = files[i];
+        const data = await fileToDataURL(file);
+        // add image
+        if(i>0) doc.addPage();
+        const img = new Image(); img.src = data; await img.decode();
+        const pw = doc.internal.pageSize.getWidth(); const ph = doc.internal.pageSize.getHeight();
+        // fit image
+        const ratio = Math.min(pw / img.width, ph / img.height);
+        const w = img.width * ratio; const h = img.height * ratio; const x = (pw - w)/2; const y = (ph - h)/2;
+        doc.addImage(data, 'JPEG', x, y, w, h);
+        const imgEl = document.createElement('img'); imgEl.className='preview-img'; imgEl.src=data; preview.appendChild(imgEl);
+      }
+      const pdfBlob = doc.output('blob');
+      saveAs(pdfBlob, 'images_merged.pdf');
+    }
+
+    function textToPdfUI(){
+      const el = document.createElement('div');
+      el.innerHTML = `
+        <h3 style="margin:0 0 8px">Text → PDF</h3>
+        <label>Title:<input id="txtTitle" type="text" style="width:100%;padding:8px;border-radius:6px;margin-top:6px;background:transparent;border:1px solid rgba(255,255,255,0.04)"></label>
+        <label style="margin-top:8px">Paste Text:<textarea id="txtContent" placeholder="Write or paste your text here..."></textarea></label><div style="display:flex;gap:8px;margin-top:8px"><button class="primary" onclick="createTextPDF()">Generate PDF</button></div>
+  `;
+  return el;
+}
+
+async function createTextPDF(){
+  const title = document.getElementById('txtTitle').value || 'Document';
+  const content = document.getElementById('txtContent').value || '';
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:'pt',format:'a4'});
+  doc.setFontSize(18); doc.text(title,40,60);
+  doc.setFontSize(12);
+  const lines = doc.splitTextToSize(content, 520);
+  doc.text(lines,40,100);
+  const blob = doc.output('blob');
+  saveAs(blob, `${title.replace(/\s+/g,'_')}.pdf`);
+}
+
+function mergePdfUI(){
+  const el = document.createElement('div');
+  el.innerHTML = `
+    <h3 style="margin:0 0 8px">Merge PDFs</h3>
+    <label>Choose PDFs (multiple): <input type="file" id="mergeFiles" accept="application/pdf" multiple></label>
+    <div style="margin-top:10px"><button class="primary" onclick="mergePDFs()">Merge</button></div>
+    <div id="mergePreview" class="preview"></div>
+  `;
+  return el;
+}
+
+async function mergePDFs(){
+  const files = document.getElementById('mergeFiles').files; if(!files.length){alert('Select files');return}
+  const { PDFDocument } = PDFLib;
+  const merged = await PDFDocument.create();
+  for(const f of files){
+    const arr = await f.arrayBuffer();
+    const doc = await PDFDocument.load(arr);
+    const copied = await merged.copyPages(doc, doc.getPageIndices());
+    copied.forEach(p=>merged.addPage(p));
+  }
+  const out = await merged.save();
+  saveAs(new Blob([out]), 'merged.pdf');
+}
+
+function compressPdfUI(){
+  const el = document.createElement('div');
+  el.innerHTML = `
+    <h3 style="margin:0 0 8px">Compress PDF (Beta)</h3>
+    <label>Upload PDF: <input type="file" id="compressInput" accept="application/pdf"></label>
+    <div style="margin-top:8px"><button class="primary" onclick="compressPDF()">Compress</button></div>
+    <p style="color:var(--muted);margin-top:8px">Note: This uses image recompression and page rasterization — good for image-heavy PDFs.</p>
+  `;
+  return el;
+}
+
+async function compressPDF(){
+  const f = document.getElementById('compressInput').files[0]; if(!f){alert('Select PDF');return}
+  // Simple approach: render pages to images at lower scale then re-generate PDF
+  const scale = 2; // smaller to compress
+  const reader = new FileReader(); reader.onload = async e=>{
+    const typed = new Uint8Array(e.target.result);
+    const pdf = await pdfjsLib.getDocument(typed).promise;
+    const { jsPDF } = window.jspdf; const doc = new jsPDF({unit:'pt',format:'a4'});
+    for(let i=1;i<=pdf.numPages;i++){
+      const page = await pdf.getPage(i);
+      const vp = page.getViewport({scale});
+      const canvas = document.createElement('canvas'); canvas.width=vp.width; canvas.height=vp.height;
+      const ctx = canvas.getContext('2d'); await page.render({canvasContext:ctx,viewport:vp}).promise;
+      const data = canvas.toDataURL('image/jpeg',0.7);
+      if(i>1) doc.addPage();
+      const img = new Image(); img.src = data; await img.decode();
+      const pw = doc.internal.pageSize.getWidth(); const ph = doc.internal.pageSize.getHeight();
+      const ratio = Math.min(pw/img.width, ph/img.height);
+      const w = img.width*ratio; const h = img.height*ratio; const x=(pw-w)/2; const y=(ph-h)/2;
+      doc.addImage(data,'JPEG',x,y,w,h);
+    }
+    saveAs(doc.output('blob'), 'compressed.pdf');
+  }; reader.readAsArrayBuffer(f);
+}
+
+function moreUI(){
+  const el = document.createElement('div');
+  el.innerHTML = `<h3 style="margin:0 0 8px">More Tools</h3><p style="color:var(--muted)">Planned: Split, Rotate, OCR, Watermark, Office → PDF, Edit metadata, Secure/Encrypt PDF.</p>`;
+  return el;
+}
+
+// helpers
+function fileToDataURL(file){return new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(file)})}
+function saveAs(blob, name){saveAsFile(blob,name)}
+
+// include a minimal saveAs fallback (FileSaver is loaded)
+function saveAsFile(blob,name){if(window.saveAs){window.saveAs(blob,name);} else {const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();}}
+
+function recommended(){showTool('pdfToJpg'); setTimeout(()=>{document.getElementById('scaleRange').value=10;document.getElementById('jpegQuality').value='1.0'},200)}
+function downloadSample(){alert('Demo: Upload images or PDFs and try the tools. To host this site, put the file on GitHub Pages or a static host.')}
+function toggleTheme(){alert('Theme toggle placeholder — you can wire dark/light here.')}
+function openDocs(){alert('Docs placeholder — I can add a full documentation page and tutorials.')}
+
+// load default
+document.addEventListener('DOMContentLoaded',()=>{})
+
+  </script>
+</body>
+</html>
