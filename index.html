@@ -154,40 +154,89 @@ footer{margin-top:28px;text-align:center;color:var(--muted)}
         <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
           <label>Scale: <input id="scaleRange" type="range" min="3" max="12" value="6"></label>
           <label>Quality: <select id="jpegQuality"><option value="1.0">1.0</option><option value="0.95">0.95</option><option value="0.9">0.9</option><option value="0.85">0.85</option></select></label>
-          <button class="primary" onclick="convertPDFtoJPG()">Convert</button>
+          <button id="pdfConvertBtn" class="primary">Convert</button>
         </div>
+        <div style="margin-top:10px"><span id="pdfStatus" style="color:var(--muted)"></span></div>
         <div id="pdfToJpgPreview" class="preview"></div>
       `;
+
+      // attach handler after DOM is created
+      setTimeout(()=>{
+        const btn = el.querySelector('#pdfConvertBtn');
+        btn.addEventListener('click', convertPDFtoJPG);
+      },50);
+
       return el;
     }
 
     async function convertPDFtoJPG(){
-      const file = document.getElementById('pdfFileInput').files[0];
-      if(!file){alert('Upload PDF first');return}
+      const fileEl = document.getElementById('pdfFileInput');
+      const statusEl = document.getElementById('pdfStatus');
+      const preview = document.getElementById('pdfToJpgPreview');
+      const btn = document.getElementById('pdfConvertBtn');
+      if(!fileEl || !fileEl.files[0]){alert('Upload PDF first');return}
+
+      const file = fileEl.files[0];
+      const baseName = (file.name || 'converted').replace(/\.pdf$/i,'');
       const scale = parseInt(document.getElementById('scaleRange').value);
       const quality = parseFloat(document.getElementById('jpegQuality').value);
-      const reader = new FileReader();
-      reader.onload = async function(e){
-        const typed = new Uint8Array(e.target.result);
-        const pdf = await pdfjsLib.getDocument(typed).promise;
-        const preview = document.getElementById('pdfToJpgPreview'); preview.innerHTML='';
-        const zip = new JSZip();
-        for(let i=1;i<=pdf.numPages;i++){
-          const page = await pdf.getPage(i);
-          const viewport = page.getViewport({scale});
-          const canvas = document.createElement('canvas');
-          canvas.width = viewport.width; canvas.height = viewport.height;
-          const ctx = canvas.getContext('2d');
-          await page.render({canvasContext:ctx,viewport}).promise;
-          const img = document.createElement('img'); img.className='preview-img'; img.src = canvas.toDataURL('image/jpeg',0.7);
-          preview.appendChild(img);
-          const blob = await new Promise(res=>canvas.toBlob(res,'image/jpeg',quality));
-          zip.file(`page_${i}.jpg`, blob);
-        }
-        const blobZip = await zip.generateAsync({type:'blob'});
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blobZip); a.download='pdf_pages.zip'; a.textContent='Download ZIP'; a.className='download'; preview.appendChild(a);
-      };
-      reader.readAsArrayBuffer(file);
+
+      // UI: show processing
+      statusEl.textContent = 'Processing — please wait...';
+      btn.disabled = true; btn.textContent = 'Processing...';
+      preview.innerHTML = '';
+
+      try{
+        const reader = new FileReader();
+        reader.onload = async function(e){
+          const typed = new Uint8Array(e.target.result);
+          const pdf = await pdfjsLib.getDocument(typed).promise;
+          const zip = new JSZip();
+
+          for(let i=1;i<=pdf.numPages;i++){
+            const page = await pdf.getPage(i);
+            const viewport = page.getViewport({scale});
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = viewport.width; canvas.height = viewport.height;
+            await page.render({canvasContext:ctx,viewport}).promise;
+
+            const imgPreview = document.createElement('img'); imgPreview.className='preview-img';
+            imgPreview.src = canvas.toDataURL('image/jpeg',0.7);
+            preview.appendChild(imgPreview);
+
+            const blob = await new Promise(res=>canvas.toBlob(res,'image/jpeg',quality));
+            // make sure filename keeps original pdf name as prefix
+            const fileName = `${baseName}_page_${i}.jpg`;
+            zip.file(fileName, blob);
+          }
+
+          // Generate ZIP
+          const zipBlob = await zip.generateAsync({type:'blob'});
+
+          // create download button in status area
+          const downloadA = document.createElement('a');
+          downloadA.href = URL.createObjectURL(zipBlob);
+          downloadA.download = `${baseName}_pages.zip`;
+          downloadA.className = 'primary';
+          downloadA.style.display = 'inline-block';
+          downloadA.style.marginTop = '8px';
+          downloadA.textContent = '⬇️ Download ZIP';
+
+          // replace status text with download link
+          statusEl.textContent = '';
+          statusEl.appendChild(downloadA);
+
+          // re-enable button
+          btn.disabled = false; btn.textContent = 'Convert';
+        };
+        reader.readAsArrayBuffer(file);
+      }catch(err){
+        console.error(err);
+        alert('Error during conversion. See console for details.');
+        statusEl.textContent = '';
+        btn.disabled = false; btn.textContent = 'Convert';
+      }
     }
 
     function imgToPdfUI(){
@@ -323,7 +372,18 @@ function saveAs(blob, name){saveAsFile(blob,name)}
 // include a minimal saveAs fallback (FileSaver is loaded)
 function saveAsFile(blob,name){if(window.saveAs){window.saveAs(blob,name);} else {const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();}}
 
-function recommended(){showTool('pdfToJpg'); setTimeout(()=>{document.getElementById('scaleRange').value=10;document.getElementById('jpegQuality').value='1.0'},200)}
+function recommended(){
+  showTool('pdfToJpg');
+  setTimeout(()=>{
+    const elScale = document.getElementById('scaleRange');
+    const elQuality = document.getElementById('jpegQuality');
+    if(elScale) elScale.value = 10;
+    if(elQuality) elQuality.value = '1.0';
+    // update UI status
+    const status = document.getElementById('pdfStatus');
+    if(status) status.textContent = 'Recommended settings applied: Scale 10, Quality 1.0';
+  },200);
+}
 function downloadSample(){alert('Demo: Upload images or PDFs and try the tools. To host this site, put the file on GitHub Pages or a static host.')}
 function toggleTheme(){alert('Theme toggle placeholder — you can wire dark/light here.')}
 function openDocs(){alert('Docs placeholder — I can add a full documentation page and tutorials.')}
